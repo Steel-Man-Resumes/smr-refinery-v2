@@ -49,6 +49,7 @@ export interface SearchOptions {
   datePosted?: 'all' | 'today' | '3days' | 'week' | 'month';
   employmentTypes?: string[]; // 'FULLTIME', 'PARTTIME', 'CONTRACTOR', 'INTERN'
   remoteOnly?: boolean;
+  workHistory?: Array<{ title: string; company?: string }>; // Add work history for smarter searches
 }
 
 /**
@@ -119,17 +120,158 @@ export async function searchEmployers(options: SearchOptions): Promise<JSearchJo
 }
 
 /**
+ * Extract searchable terms from work history job titles
+ */
+export function extractWorkHistoryTerms(workHistory: Array<{ title: string; company?: string }>): string[] {
+  if (!workHistory?.length) return [];
+  
+  const terms: string[] = [];
+  
+  // Industry detection patterns
+  const industryPatterns: Record<string, string[]> = {
+    'warehouse|fulfillment|distribution|logistics': ['Warehouse', 'Warehouse Associate', 'Distribution', 'Logistics'],
+    'forklift|lift|material handler': ['Forklift Operator', 'Material Handler', 'Warehouse'],
+    'machine|operator|cnc|press': ['Machine Operator', 'Production Operator', 'Manufacturing'],
+    'weld|fabricat': ['Welder', 'Fabricator', 'Manufacturing'],
+    'mechanic|maintenance|technician': ['Maintenance Technician', 'Mechanic', 'Industrial Maintenance'],
+    'assembl|production|manufacturing': ['Assembler', 'Production', 'Manufacturing'],
+    'landscap|lawn|grounds': ['Landscaper', 'Grounds Maintenance', 'General Labor'],
+    'construct|carpenter|framing': ['Construction', 'General Labor', 'Carpenter'],
+    'electri': ['Electrician', 'Industrial Electrician'],
+    'plumb|pipe': ['Plumber', 'Pipefitter'],
+    'hvac|heating|cooling': ['HVAC Technician', 'HVAC'],
+    'driver|cdl|truck|delivery': ['Driver', 'CDL Driver', 'Delivery Driver'],
+    'cook|kitchen|food|restaurant': ['Cook', 'Kitchen', 'Food Service', 'Food Production'],
+    'clean|janitor|custod': ['Janitor', 'Custodian', 'Cleaner'],
+    'secur|guard': ['Security Guard', 'Security'],
+    'ship|receiv|dock': ['Shipping', 'Receiving', 'Dock Worker'],
+    'pack|pick': ['Picker', 'Packer', 'Order Picker'],
+    'quality|qc|qa|inspector': ['Quality Control', 'QC Inspector', 'Quality Technician'],
+    'lead|supervisor|foreman|manager': ['Team Lead', 'Supervisor', 'Shift Lead'],
+    'labor|general': ['General Labor', 'Laborer'],
+  };
+  
+  for (const job of workHistory) {
+    const title = (job.title || '').toLowerCase();
+    
+    for (const [pattern, searchTerms] of Object.entries(industryPatterns)) {
+      const regex = new RegExp(pattern, 'i');
+      if (regex.test(title)) {
+        terms.push(...searchTerms);
+      }
+    }
+  }
+  
+  // Dedupe
+  return Array.from(new Set(terms));
+}
+
+/**
+ * Get broad fallback terms that should always return results
+ * Based on target role and work history to stay relevant
+ */
+export function getBroadFallbackTerms(targetRole: string, workHistory?: Array<{ title: string }>): string[] {
+  const input = targetRole.toLowerCase();
+  const fallbacks: string[] = [];
+  
+  // Analyze what type of work they're looking for
+  const isLeadership = /lead|super|foreman|manager|boss/.test(input);
+  const isQuality = /qc|qa|quality|inspect/.test(input);
+  const isDriverRelated = /driver|cdl|truck|delivery/.test(input);
+  const isTrades = /hvac|electri|plumb|weld|mechanic|carpenter/.test(input);
+  const isFood = /cook|kitchen|food|restaurant/.test(input);
+  const isOutdoor = /landscap|construct|labor/.test(input);
+  
+  // Add category-appropriate fallbacks
+  if (isLeadership) {
+    fallbacks.push('Supervisor', 'Team Lead', 'Shift Lead', 'Foreman', 'Production Supervisor');
+  }
+  
+  if (isQuality) {
+    fallbacks.push('Quality Control', 'Inspector', 'Quality Technician', 'QC');
+  }
+  
+  if (isDriverRelated) {
+    fallbacks.push('Driver', 'CDL Driver', 'Delivery Driver', 'Truck Driver');
+  }
+  
+  if (isTrades) {
+    fallbacks.push('Maintenance Technician', 'Industrial Maintenance', 'Mechanic');
+  }
+  
+  if (isFood) {
+    fallbacks.push('Food Production', 'Kitchen', 'Food Manufacturing', 'Cook');
+  }
+  
+  if (isOutdoor) {
+    fallbacks.push('Construction', 'General Labor', 'Landscaper', 'Labor');
+  }
+  
+  // Universal high-volume terms that almost always have openings
+  // Only add ones that make sense for blue collar
+  const universalTerms = [
+    'Warehouse',
+    'Production',
+    'Manufacturing',
+    'General Labor',
+    'Forklift Operator',
+    'Material Handler',
+    'Assembler',
+  ];
+  
+  // Add universal terms but limit to avoid too many searches
+  for (const term of universalTerms) {
+    if (fallbacks.length < 6 && !fallbacks.includes(term)) {
+      fallbacks.push(term);
+    }
+  }
+  
+  return fallbacks;
+}
+
+/**
  * Expand search with PARALLEL queries for speed
  * Pro tier RapidAPI can handle concurrent requests
+ * Now uses work history and smart fallbacks to maximize results
  */
 export async function searchEmployersExpanded(options: SearchOptions): Promise<JSearchJob[]> {
   const startTime = Date.now();
   
-  // First, normalize the target role
+  // 1. Normalize the target role into search terms
   const normalizedRoles = normalizeTargetRole(options.targetRole);
-  // Take up to 8 roles for parallel search (Pro tier can handle it)
-  const rolesToSearch = normalizedRoles.slice(0, 8);
-  console.log(`[JSearch] Normalized "${options.targetRole}" to: [${rolesToSearch.join(', ')}]`);
+  
+  // 2. Extract terms from work history
+  const workHistoryTerms = extractWorkHistoryTerms(options.workHistory || []);
+  
+  // 3. Get broad fallback terms based on target + history
+  const fallbackTerms = getBroadFallbackTerms(options.targetRole, options.workHistory);
+  
+  // 4. Combine all terms, prioritize: normalized roles > work history > fallbacks
+  const allTerms = [
+    ...normalizedRoles,
+    ...workHistoryTerms,
+    ...fallbackTerms,
+  ];
+  
+  // Deduplicate while preserving priority order
+  const seenTerms = new Set<string>();
+  const uniqueTerms: string[] = [];
+  for (const term of allTerms) {
+    const key = term.toLowerCase();
+    if (!seenTerms.has(key)) {
+      seenTerms.add(key);
+      uniqueTerms.push(term);
+    }
+  }
+  
+  // Take up to 12 roles for parallel search (Pro tier can handle it)
+  const rolesToSearch = uniqueTerms.slice(0, 12);
+  
+  console.log(`[JSearch] Target: "${options.targetRole}"`);
+  console.log(`[JSearch] Normalized roles: [${normalizedRoles.join(', ')}]`);
+  console.log(`[JSearch] Work history terms: [${workHistoryTerms.join(', ')}]`);
+  console.log(`[JSearch] Fallback terms: [${fallbackTerms.join(', ')}]`);
+  console.log(`[JSearch] Final search terms (${rolesToSearch.length}): [${rolesToSearch.join(', ')}]`);
   console.log(`[JSearch] Running ${rolesToSearch.length} searches in PARALLEL...`);
   
   // Run ALL searches in parallel - Pro tier can handle concurrent requests
@@ -163,11 +305,19 @@ export async function searchEmployersExpanded(options: SearchOptions): Promise<J
       }
     }
     
-    console.log(`[JSearch] "${role}": ${jobs.length} jobs, ${newCount} new unique`);
+    if (jobs.length > 0) {
+      console.log(`[JSearch] "${role}": ${jobs.length} jobs, ${newCount} new unique`);
+    }
   }
   
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`[JSearch] PARALLEL COMPLETE: ${allJobs.length} unique employers from ${rolesToSearch.length} searches in ${elapsed}s`);
+  
+  // If we still don't have enough, log a warning
+  if (allJobs.length < MIN_EMPLOYERS) {
+    console.warn(`[JSearch] WARNING: Only found ${allJobs.length} employers (target: ${MIN_EMPLOYERS})`);
+  }
+  
   return allJobs;
 }
 
@@ -181,43 +331,47 @@ export function normalizeTargetRole(rawInput: string): string[] {
   
   // Common abbreviation/slang mappings
   const mappings: Record<string, string[]> = {
-    'qc': ['Quality Control', 'QC Inspector', 'Quality Technician', 'Quality Assurance'],
+    'qc': ['Quality Control', 'QC Inspector', 'Quality Technician'],
     'qa': ['Quality Assurance', 'QA Technician', 'Quality Control'],
-    'lead': ['Team Lead', 'Lead', 'Shift Lead', 'Production Lead'],
-    'lead man': ['Team Lead', 'Lead Hand', 'Shift Lead', 'Production Lead'],
-    'leadman': ['Team Lead', 'Lead Hand', 'Shift Lead', 'Production Lead'],
+    'lead': ['Team Lead', 'Shift Lead', 'Production Lead'],
+    'lead man': ['Team Lead', 'Lead Hand', 'Shift Lead'],
+    'leadman': ['Team Lead', 'Lead Hand', 'Shift Lead'],
     'supervisor': ['Supervisor', 'Shift Supervisor', 'Production Supervisor'],
     'forklift': ['Forklift Operator', 'Forklift Driver', 'Material Handler'],
     'cdl': ['CDL Driver', 'Truck Driver', 'Delivery Driver'],
-    'driver': ['Driver', 'Delivery Driver', 'CDL Driver', 'Route Driver'],
+    'driver': ['Driver', 'Delivery Driver', 'CDL Driver'],
     'warehouse': ['Warehouse', 'Warehouse Associate', 'Warehouse Worker'],
     'machine operator': ['Machine Operator', 'CNC Operator', 'Production Operator'],
     'machinist': ['Machinist', 'CNC Machinist', 'Machine Operator'],
-    'welder': ['Welder', 'MIG Welder', 'TIG Welder', 'Fabricator'],
-    'mechanic': ['Mechanic', 'Maintenance Mechanic', 'Auto Mechanic', 'Diesel Mechanic'],
-    'maintenance': ['Maintenance Technician', 'Maintenance Mechanic', 'Facilities Maintenance'],
-    'hvac': ['HVAC Technician', 'HVAC Installer', 'HVAC Mechanic'],
-    'electrician': ['Electrician', 'Industrial Electrician', 'Maintenance Electrician'],
-    'plumber': ['Plumber', 'Plumbing Technician', 'Pipefitter'],
-    'carpenter': ['Carpenter', 'Finish Carpenter', 'Construction Carpenter'],
+    'welder': ['Welder', 'MIG Welder', 'Fabricator'],
+    'mechanic': ['Mechanic', 'Maintenance Mechanic', 'Diesel Mechanic'],
+    'maintenance': ['Maintenance Technician', 'Maintenance Mechanic', 'Facilities'],
+    'hvac': ['HVAC Technician', 'HVAC Installer'],
+    'electrician': ['Electrician', 'Industrial Electrician'],
+    'plumber': ['Plumber', 'Pipefitter'],
+    'carpenter': ['Carpenter', 'Construction Carpenter'],
     'assembly': ['Assembler', 'Assembly Line', 'Production Assembler'],
-    'picker': ['Order Picker', 'Warehouse Picker', 'Picker Packer'],
-    'packer': ['Packer', 'Shipping Packer', 'Warehouse Packer'],
-    'shipping': ['Shipping', 'Shipping Clerk', 'Shipping Associate'],
-    'receiving': ['Receiving', 'Receiving Clerk', 'Receiving Associate'],
-    'inventory': ['Inventory', 'Inventory Control', 'Inventory Specialist'],
-    'production': ['Production', 'Production Worker', 'Production Associate'],
-    'manufacturing': ['Manufacturing', 'Manufacturing Associate', 'Production'],
-    'food': ['Food Production', 'Food Manufacturing', 'Food Processing'],
-    'cook': ['Cook', 'Line Cook', 'Prep Cook', 'Kitchen'],
-    'kitchen': ['Kitchen', 'Kitchen Staff', 'Food Service'],
-    'cleaning': ['Cleaner', 'Janitor', 'Custodian', 'Housekeeper'],
+    'picker': ['Order Picker', 'Warehouse Picker'],
+    'packer': ['Packer', 'Shipping Packer'],
+    'shipping': ['Shipping', 'Shipping Clerk'],
+    'receiving': ['Receiving', 'Receiving Clerk'],
+    'inventory': ['Inventory', 'Inventory Control'],
+    'production': ['Production', 'Production Worker'],
+    'manufacturing': ['Manufacturing', 'Production'],
+    'food': ['Food Production', 'Food Manufacturing'],
+    'cook': ['Cook', 'Line Cook', 'Prep Cook'],
+    'kitchen': ['Kitchen', 'Kitchen Staff'],
+    'cleaning': ['Cleaner', 'Janitor', 'Custodian'],
     'janitor': ['Janitor', 'Custodian', 'Cleaner'],
-    'security': ['Security Guard', 'Security Officer', 'Security'],
-    'landscaping': ['Landscaper', 'Landscape Technician', 'Grounds Maintenance'],
-    'construction': ['Construction Worker', 'Construction Laborer', 'General Labor'],
-    'laborer': ['General Laborer', 'Construction Laborer', 'Warehouse Laborer'],
-    'helper': ['Helper', 'Trade Helper', 'Assistant'],
+    'security': ['Security Guard', 'Security Officer'],
+    'landscaping': ['Landscaper', 'Grounds Maintenance'],
+    'construction': ['Construction Worker', 'Construction Laborer'],
+    'laborer': ['General Laborer', 'Construction Laborer'],
+    'helper': ['Helper', 'Trade Helper'],
+    'inspector': ['Inspector', 'Quality Inspector', 'QC Inspector'],
+    'technician': ['Technician', 'Maintenance Technician'],
+    'operator': ['Operator', 'Machine Operator', 'Equipment Operator'],
+    'material handler': ['Material Handler', 'Warehouse', 'Forklift Operator'],
   };
   
   // Check for known terms in the input
@@ -230,7 +384,7 @@ export function normalizeTargetRole(rawInput: string): string[] {
   // If nothing matched, try to extract meaningful words
   if (searchTerms.length === 0) {
     // Remove common filler words
-    const fillers = ['role', 'job', 'position', 'work', 'or', 'and', 'the', 'a', 'an', 'in', 'at', 'for', 'to', 'i', 'want', 'looking', 'need', 'something'];
+    const fillers = ['role', 'job', 'position', 'work', 'or', 'and', 'the', 'a', 'an', 'in', 'at', 'for', 'to', 'i', 'want', 'looking', 'need', 'something', 'type', 'kind', 'of'];
     const words = input.split(/\s+/).filter(w => w.length > 2 && !fillers.includes(w));
     
     if (words.length > 0) {
@@ -250,11 +404,12 @@ export function normalizeTargetRole(rawInput: string): string[] {
   
   // Ultimate fallback - generic blue collar terms
   if (searchTerms.length === 0) {
-    searchTerms.push('General Labor', 'Warehouse', 'Production', 'Manufacturing');
+    searchTerms.push('General Labor', 'Warehouse', 'Production');
   }
   
-  // Dedupe and return
-  return Array.from(new Set(searchTerms));
+  // Dedupe and return (limit to prevent too many similar terms)
+  const unique = Array.from(new Set(searchTerms));
+  return unique.slice(0, 8); // Max 8 from normalization
 }
 
 /**
@@ -356,6 +511,9 @@ export function convertToEmployers(jobs: JSearchJob[]): Partial<RawEmployerData>
 export default {
   searchEmployers,
   searchEmployersExpanded,
+  normalizeTargetRole,
+  extractWorkHistoryTerms,
+  getBroadFallbackTerms,
   assignTiers,
   extractIndustry,
   convertToEmployers,
