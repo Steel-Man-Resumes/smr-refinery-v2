@@ -13,6 +13,38 @@ import PaymentStage from '@/components/refinery/PaymentStage';
 import GenerationStage from '@/components/refinery/GenerationStage';
 import DownloadStage from '@/components/refinery/DownloadStage';
 
+function StartOverButton() {
+  const handleStartOver = () => {
+    if (window.confirm('Start over? This will clear all your progress and return you to the beginning.')) {
+      // Clear Refinery state
+      localStorage.removeItem('refinery_state');
+      localStorage.removeItem('refineryStore');
+      // Redirect to Forge to start fresh
+      window.location.href = 'https://smr-forge.vercel.app';
+    }
+  };
+
+  return (
+    <button
+      onClick={handleStartOver}
+      className="fixed top-4 right-4 z-50 text-white/40 hover:text-white/80 text-sm underline transition-colors"
+    >
+      Start Over
+    </button>
+  );
+}
+
+export function BackButton({ onClick, label = "← Back" }: { onClick: () => void; label?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-white/60 hover:text-white text-sm mb-4 transition-colors"
+    >
+      {label}
+    </button>
+  );
+}
+
 function DestroyDataButton() {
   const { resetAll } = useRefinery();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -155,6 +187,7 @@ function RefineryContent() {
 
   return (
     <div className="pb-24">
+      <StartOverButton />
       <StripeReturnHandler />
       {renderStage()}
       <DestroyDataButton />

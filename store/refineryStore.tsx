@@ -24,6 +24,9 @@ export type RefineryStage =
 
 // Screening responses
 export interface ScreeningResponses {
+  // Profile corrections (from confirm-profile stage)
+  profile_corrections?: string;
+
   // Screen 1: Legal/Criminal
   criminal_record?: string;
   criminal_details?: string;
@@ -44,7 +47,7 @@ export interface ScreeningResponses {
   disability?: 'yes' | 'no' | 'prefer_not_to_say';
   disability_accommodation?: string;
   other_barriers?: string;
-  
+
   // Life situation (childcare, transportation, etc.)
   childcare_needs?: string;
   transportation_details?: string;

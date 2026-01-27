@@ -1,12 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { useRefinery } from '@/store/refineryStore';
 import GlassPanel from '@/components/ui/GlassPanel';
 import Button from '@/components/ui/Button';
 
 export default function ConfirmProfileStage() {
-  const { state, nextStage, prevStage } = useRefinery();
+  const { state, nextStage, prevStage, updateScreeningResponse } = useRefinery();
   const payload = state.forgePayload;
+  const [additionalNotes, setAdditionalNotes] = useState(state.screeningResponses.profile_corrections || '');
+
+  const handleContinue = () => {
+    // Save the additional notes if provided
+    if (additionalNotes.trim()) {
+      updateScreeningResponse('profile_corrections', additionalNotes);
+    }
+    nextStage();
+  };
 
   if (!payload) {
     return (
@@ -113,11 +123,25 @@ export default function ConfirmProfileStage() {
           </div>
         )}
 
-        <div className="flex gap-4">
+        {/* Anything we missed? */}
+        <div className="mt-6">
+          <label className="block text-white/80 text-sm mb-2">
+            Anything we missed or got wrong?
+          </label>
+          <textarea
+            value={additionalNotes}
+            onChange={(e) => setAdditionalNotes(e.target.value)}
+            placeholder="Optional: Add any corrections or additional context..."
+            className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-white/40 text-sm resize-none"
+            rows={3}
+          />
+        </div>
+
+        <div className="flex gap-4 mt-6">
           <Button variant="secondary" onClick={prevStage}>
             ← Back
           </Button>
-          <Button variant="primary" onClick={nextStage} fullWidth>
+          <Button variant="primary" onClick={handleContinue} fullWidth>
             Looks Good, Continue →
           </Button>
         </div>
