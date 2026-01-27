@@ -3,10 +3,15 @@ import "./globals.css";
 import { RefineryProvider } from "@/store/refineryStore";
 
 export const metadata: Metadata = {
-  title: "The Refinery | Steel Man Resumes",
-  description: "Transform your career intelligence into professional job search documents. $37.21 for your complete package.",
+  title: 'The Refinery | Steel Man Resumes',
+  description: 'Document generation system',
   icons: {
-    icon: "/assets/icon-refinery.svg",
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
 };
 
