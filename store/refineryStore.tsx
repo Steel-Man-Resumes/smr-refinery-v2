@@ -306,6 +306,10 @@ export function RefineryProvider({ children }: { children: ReactNode }) {
   // Navigation
   const setStage = (stage: RefineryStage) => {
     setState((prev) => ({ ...prev, currentStage: stage }));
+    // Scroll to top on stage change
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const nextStage = () => {
