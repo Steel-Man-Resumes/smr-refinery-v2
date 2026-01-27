@@ -141,28 +141,53 @@ export async function searchEmployers(options: SearchOptions): Promise<JSearchJo
 
 /**
  * Expand search with alternative queries if initial search doesn't return enough results
+ * Now with role normalization for garbage input
  */
 export async function searchEmployersExpanded(options: SearchOptions): Promise<JSearchJob[]> {
-  let allJobs = await searchEmployers(options);
+  // First, normalize the target role
+  const normalizedRoles = normalizeTargetRole(options.targetRole);
+  console.log(`[JSearch] Normalized "${options.targetRole}" to: [${normalizedRoles.slice(0, 5).join(', ')}${normalizedRoles.length > 5 ? '...' : ''}]`);
   
-  // If we don't have enough, try alternative search terms
+  const allJobs: JSearchJob[] = [];
+  const seenEmployers = new Set<string>();
+  
+  // Search with each normalized role
+  for (const role of normalizedRoles) {
+    if (allJobs.length >= MIN_EMPLOYERS) break;
+    
+    console.log(`[JSearch] Searching: "${role}"`);
+    
+    const jobs = await searchEmployers({
+      ...options,
+      targetRole: role,
+    });
+    
+    // Add only new employers
+    for (const job of jobs) {
+      const key = job.employer_name?.toLowerCase().trim();
+      if (key && !seenEmployers.has(key)) {
+        seenEmployers.add(key);
+        allJobs.push(job);
+      }
+    }
+    
+    console.log(`[JSearch] After "${role}": ${allJobs.length} total unique employers`);
+  }
+  
+  // If still not enough, try the legacy alternative roles
   if (allJobs.length < MIN_EMPLOYERS) {
-    console.log(`[JSearch] Only ${allJobs.length} results, trying alternative searches...`);
+    console.log(`[JSearch] Only ${allJobs.length} results, trying legacy alternatives...`);
     
     const alternativeRoles = getAlternativeRoles(options.targetRole);
-    const seenEmployers = new Set(allJobs.map(j => j.employer_name?.toLowerCase().trim()));
     
     for (const altRole of alternativeRoles) {
       if (allJobs.length >= MIN_EMPLOYERS) break;
-      
-      console.log(`[JSearch] Trying alternative: "${altRole}"`);
       
       const altJobs = await searchEmployers({
         ...options,
         targetRole: altRole,
       });
       
-      // Add only new employers
       for (const job of altJobs) {
         const key = job.employer_name?.toLowerCase().trim();
         if (key && !seenEmployers.has(key)) {
@@ -173,7 +198,94 @@ export async function searchEmployersExpanded(options: SearchOptions): Promise<J
     }
   }
   
+  console.log(`[JSearch] Final result: ${allJobs.length} unique employers`);
   return allJobs;
+}
+
+/**
+ * Normalize user input into searchable job titles
+ * Handles garbage like "lead man role or QC" -> ["Lead", "Quality Control", "Team Lead", "QC Inspector"]
+ */
+export function normalizeTargetRole(rawInput: string): string[] {
+  const input = rawInput.toLowerCase().trim();
+  const searchTerms: string[] = [];
+  
+  // Common abbreviation/slang mappings
+  const mappings: Record<string, string[]> = {
+    'qc': ['Quality Control', 'QC Inspector', 'Quality Technician', 'Quality Assurance'],
+    'qa': ['Quality Assurance', 'QA Technician', 'Quality Control'],
+    'lead': ['Team Lead', 'Lead', 'Shift Lead', 'Production Lead'],
+    'lead man': ['Team Lead', 'Lead Hand', 'Shift Lead', 'Production Lead'],
+    'leadman': ['Team Lead', 'Lead Hand', 'Shift Lead', 'Production Lead'],
+    'supervisor': ['Supervisor', 'Shift Supervisor', 'Production Supervisor'],
+    'forklift': ['Forklift Operator', 'Forklift Driver', 'Material Handler'],
+    'cdl': ['CDL Driver', 'Truck Driver', 'Delivery Driver'],
+    'driver': ['Driver', 'Delivery Driver', 'CDL Driver', 'Route Driver'],
+    'warehouse': ['Warehouse', 'Warehouse Associate', 'Warehouse Worker'],
+    'machine operator': ['Machine Operator', 'CNC Operator', 'Production Operator'],
+    'machinist': ['Machinist', 'CNC Machinist', 'Machine Operator'],
+    'welder': ['Welder', 'MIG Welder', 'TIG Welder', 'Fabricator'],
+    'mechanic': ['Mechanic', 'Maintenance Mechanic', 'Auto Mechanic', 'Diesel Mechanic'],
+    'maintenance': ['Maintenance Technician', 'Maintenance Mechanic', 'Facilities Maintenance'],
+    'hvac': ['HVAC Technician', 'HVAC Installer', 'HVAC Mechanic'],
+    'electrician': ['Electrician', 'Industrial Electrician', 'Maintenance Electrician'],
+    'plumber': ['Plumber', 'Plumbing Technician', 'Pipefitter'],
+    'carpenter': ['Carpenter', 'Finish Carpenter', 'Construction Carpenter'],
+    'assembly': ['Assembler', 'Assembly Line', 'Production Assembler'],
+    'picker': ['Order Picker', 'Warehouse Picker', 'Picker Packer'],
+    'packer': ['Packer', 'Shipping Packer', 'Warehouse Packer'],
+    'shipping': ['Shipping', 'Shipping Clerk', 'Shipping Associate'],
+    'receiving': ['Receiving', 'Receiving Clerk', 'Receiving Associate'],
+    'inventory': ['Inventory', 'Inventory Control', 'Inventory Specialist'],
+    'production': ['Production', 'Production Worker', 'Production Associate'],
+    'manufacturing': ['Manufacturing', 'Manufacturing Associate', 'Production'],
+    'food': ['Food Production', 'Food Manufacturing', 'Food Processing'],
+    'cook': ['Cook', 'Line Cook', 'Prep Cook', 'Kitchen'],
+    'kitchen': ['Kitchen', 'Kitchen Staff', 'Food Service'],
+    'cleaning': ['Cleaner', 'Janitor', 'Custodian', 'Housekeeper'],
+    'janitor': ['Janitor', 'Custodian', 'Cleaner'],
+    'security': ['Security Guard', 'Security Officer', 'Security'],
+    'landscaping': ['Landscaper', 'Landscape Technician', 'Grounds Maintenance'],
+    'construction': ['Construction Worker', 'Construction Laborer', 'General Labor'],
+    'laborer': ['General Laborer', 'Construction Laborer', 'Warehouse Laborer'],
+    'helper': ['Helper', 'Trade Helper', 'Assistant'],
+  };
+  
+  // Check for known terms in the input
+  for (const [key, values] of Object.entries(mappings)) {
+    if (input.includes(key)) {
+      searchTerms.push(...values);
+    }
+  }
+  
+  // If nothing matched, try to extract meaningful words
+  if (searchTerms.length === 0) {
+    // Remove common filler words
+    const fillers = ['role', 'job', 'position', 'work', 'or', 'and', 'the', 'a', 'an', 'in', 'at', 'for', 'to', 'i', 'want', 'looking', 'need', 'something'];
+    const words = input.split(/\s+/).filter(w => w.length > 2 && !fillers.includes(w));
+    
+    if (words.length > 0) {
+      // Capitalize each word and use as search term
+      const cleaned = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      searchTerms.push(cleaned);
+      
+      // Also add individual significant words as fallback
+      for (const word of words) {
+        const capitalized = word.charAt(0).toUpperCase() + word.slice(1);
+        if (!searchTerms.includes(capitalized)) {
+          searchTerms.push(capitalized);
+        }
+      }
+    }
+  }
+  
+  // Ultimate fallback - generic blue collar terms
+  if (searchTerms.length === 0) {
+    searchTerms.push('General Labor', 'Warehouse', 'Production', 'Manufacturing');
+  }
+  
+  // Dedupe and return
+  return [...new Set(searchTerms)];
 }
 
 /**

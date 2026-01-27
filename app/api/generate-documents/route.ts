@@ -6,7 +6,7 @@ import { createSalaryNegotiationDOCX } from '@/lib/salaryNegotiationGenerator';
 import { createInterviewPrepDOCX } from '@/lib/interviewPrepGenerator';
 import { validateEmployer, validateEmployerName, type ValidatedEmployer } from '@/lib/employerValidation';
 import { calculateTotalExperience } from '@/lib/experienceCalculator';
-import { searchEmployers, assignTiers } from '@/lib/employerSearch';
+import { searchEmployersExpanded, assignTiers } from '@/lib/employerSearch';
 import { COLORS, createHeaderBox, createEmployerCard, createScriptBox, createCalloutBox, createWeekHeader, createDayBox } from '@/lib/documentStyles';
 import { buildBatchWhyGoodFitPrompt, parseBatchResponse, generateFallbackFit, validateWhyGoodFit } from '@/lib/whyGoodFitGenerator';
 import { generateTargetEmployersDOCX } from '@/lib/targetEmployersGenerator';
@@ -253,7 +253,7 @@ export async function POST(req: NextRequest) {
       console.warn('  Skipping JSearch API call, using Forge employers only');
     } else {
       try {
-        const jobResults = await searchEmployers({
+        const jobResults = await searchEmployersExpanded({
           targetRole,
           city,
           state,

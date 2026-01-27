@@ -345,9 +345,69 @@ export async function generateTargetEmployersDOCX(payload: ForgePayloadV1): Prom
   // Get employers from research
   const employers = payload.research?.target_employers || [];
 
-  // Validate we have employers
+  // Handle empty employers gracefully with fallback message
   if (employers.length === 0) {
-    throw new Error('No target employers found in payload');
+    console.warn('[TargetEmployersGenerator] No employers found in payload, generating placeholder document');
+    // Create a placeholder document
+    const doc = new Document({
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Arial', size: 22 },
+          },
+        },
+      },
+      sections: [{
+        properties: {
+          page: {
+            size: { width: 12240, height: 15840 },
+            margin: { top: 720, right: 720, bottom: 720, left: 720 },
+          },
+        },
+        children: [
+          createHeaderBox(candidateName, targetRole, location, salaryRange, commute),
+          spacer(300),
+          new Paragraph({
+            spacing: { before: 400, after: 200 },
+            children: [text('EMPLOYER SEARCH IN PROGRESS', { size: 32, bold: true, color: COLORS.GOLD })],
+          }),
+          new Paragraph({
+            spacing: { after: 200 },
+            children: [
+              text(`We searched for "${targetRole}" positions in ${location}, but the job search API returned limited results. This can happen with very specific job titles.`, { size: 22 }),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 200 },
+            children: [
+              text('WHAT TO DO:', { bold: true, size: 24 }),
+            ],
+          }),
+          new Paragraph({
+            spacing: { after: 120 },
+            children: [text('1. Search job boards directly: Indeed, LinkedIn, ZipRecruiter, company career pages', { size: 22 })],
+          }),
+          new Paragraph({
+            spacing: { after: 120 },
+            children: [text('2. Try broader job titles: "Production Worker", "Warehouse", "Manufacturing", "Quality Control"', { size: 22 })],
+          }),
+          new Paragraph({
+            spacing: { after: 120 },
+            children: [text('3. Contact staffing agencies in your area - they often have unadvertised positions', { size: 22 })],
+          }),
+          new Paragraph({
+            spacing: { after: 120 },
+            children: [text('4. Visit local employers in person with your resume', { size: 22 })],
+          }),
+          spacer(300),
+          new Paragraph({
+            children: [text('Your resume, cover letters, and action plan are still fully customized to help you succeed!', { italics: true, color: COLORS.GRAY })],
+          }),
+        ],
+      }],
+    });
+    const buffer = await Packer.toBuffer(doc);
+    return { docx: buffer, employers: [] };
   }
 
   // Split into tiers
