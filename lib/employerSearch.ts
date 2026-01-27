@@ -6,8 +6,8 @@
 import { validateEmployer, ValidatedEmployer, RawEmployerData } from './employerValidation';
 
 const JSEARCH_HOST = 'jsearch.p.rapidapi.com';
-const MIN_EMPLOYERS = 50;
-const MAX_PAGES = 10; // Pro tier allows more requests
+const MIN_EMPLOYERS = 50; // Target 50 employers
+const MAX_PAGES = 2; // Keep pages low since we're running parallel
 
 export interface JSearchJob {
   employer_name: string;
@@ -61,9 +61,7 @@ export async function searchEmployers(options: SearchOptions): Promise<JSearchJo
   const allJobs: JSearchJob[] = [];
   const seenEmployers = new Set<string>();
   
-  console.log(`[JSearch] Starting search: "${targetRole}" in ${city}, ${state}`);
-  
-  // Fetch multiple pages to get 50+ unique employers
+  // Fetch multiple pages to get unique employers
   for (let page = 1; page <= MAX_PAGES; page++) {
     try {
       const url = new URL('https://jsearch.p.rapidapi.com/search');
@@ -89,116 +87,87 @@ export async function searchEmployers(options: SearchOptions): Promise<JSearchJo
       });
       
       if (!response.ok) {
-        console.error(`[JSearch] Page ${page} failed: ${response.status} ${response.statusText}`);
-        
-        // If rate limited, wait and retry once
+        // If rate limited, don't retry in parallel mode - just return what we have
         if (response.status === 429) {
-          console.log('[JSearch] Rate limited, waiting 2s and retrying...');
-          await new Promise(r => setTimeout(r, 2000));
-          continue;
+          console.log(`[JSearch] Rate limited on "${targetRole}" page ${page}, returning partial results`);
+          break;
         }
-        
         continue;
       }
       
       const data: JSearchResponse = await response.json();
       
       if (!data.data?.length) {
-        console.log(`[JSearch] No more results at page ${page}`);
         break;
       }
       
       // Deduplicate by employer name (case-insensitive)
-      let newCount = 0;
       for (const job of data.data) {
         const key = job.employer_name?.toLowerCase().trim();
         if (key && key.length > 2 && !seenEmployers.has(key)) {
           seenEmployers.add(key);
           allJobs.push(job);
-          newCount++;
         }
       }
       
-      console.log(`[JSearch] Page ${page}: ${data.data.length} jobs, ${newCount} new employers, ${allJobs.length} total unique`);
-      
-      // Stop if we have enough
-      if (allJobs.length >= MIN_EMPLOYERS) {
-        console.log(`[JSearch] Reached ${MIN_EMPLOYERS}+ employers, stopping search`);
-        break;
-      }
-      
-      // Small delay to be nice to the API
-      await new Promise(r => setTimeout(r, 200));
-      
     } catch (err) {
-      console.error(`[JSearch] Page ${page} error:`, err);
+      console.error(`[JSearch] Error on "${targetRole}" page ${page}:`, err);
     }
   }
   
-  console.log(`[JSearch] Search complete: ${allJobs.length} unique employers found`);
   return allJobs;
 }
 
 /**
- * Expand search with alternative queries if initial search doesn't return enough results
- * Now with role normalization for garbage input
+ * Expand search with PARALLEL queries for speed
+ * Pro tier RapidAPI can handle concurrent requests
  */
 export async function searchEmployersExpanded(options: SearchOptions): Promise<JSearchJob[]> {
+  const startTime = Date.now();
+  
   // First, normalize the target role
   const normalizedRoles = normalizeTargetRole(options.targetRole);
-  console.log(`[JSearch] Normalized "${options.targetRole}" to: [${normalizedRoles.slice(0, 5).join(', ')}${normalizedRoles.length > 5 ? '...' : ''}]`);
+  // Take up to 8 roles for parallel search (Pro tier can handle it)
+  const rolesToSearch = normalizedRoles.slice(0, 8);
+  console.log(`[JSearch] Normalized "${options.targetRole}" to: [${rolesToSearch.join(', ')}]`);
+  console.log(`[JSearch] Running ${rolesToSearch.length} searches in PARALLEL...`);
   
-  const allJobs: JSearchJob[] = [];
-  const seenEmployers = new Set<string>();
-  
-  // Search with each normalized role
-  for (const role of normalizedRoles) {
-    if (allJobs.length >= MIN_EMPLOYERS) break;
-    
-    console.log(`[JSearch] Searching: "${role}"`);
-    
-    const jobs = await searchEmployers({
+  // Run ALL searches in parallel - Pro tier can handle concurrent requests
+  const searchPromises = rolesToSearch.map(role => 
+    searchEmployers({
       ...options,
       targetRole: role,
-    });
+    }).catch(err => {
+      console.error(`[JSearch] Search failed for "${role}":`, err.message);
+      return [] as JSearchJob[]; // Return empty on error, don't fail entire batch
+    })
+  );
+  
+  const results = await Promise.all(searchPromises);
+  
+  // Merge and deduplicate
+  const seenEmployers = new Set<string>();
+  const allJobs: JSearchJob[] = [];
+  
+  for (let i = 0; i < results.length; i++) {
+    const jobs = results[i];
+    const role = rolesToSearch[i];
+    let newCount = 0;
     
-    // Add only new employers
     for (const job of jobs) {
       const key = job.employer_name?.toLowerCase().trim();
-      if (key && !seenEmployers.has(key)) {
+      if (key && key.length > 2 && !seenEmployers.has(key)) {
         seenEmployers.add(key);
         allJobs.push(job);
+        newCount++;
       }
     }
     
-    console.log(`[JSearch] After "${role}": ${allJobs.length} total unique employers`);
+    console.log(`[JSearch] "${role}": ${jobs.length} jobs, ${newCount} new unique`);
   }
   
-  // If still not enough, try the legacy alternative roles
-  if (allJobs.length < MIN_EMPLOYERS) {
-    console.log(`[JSearch] Only ${allJobs.length} results, trying legacy alternatives...`);
-    
-    const alternativeRoles = getAlternativeRoles(options.targetRole);
-    
-    for (const altRole of alternativeRoles) {
-      if (allJobs.length >= MIN_EMPLOYERS) break;
-      
-      const altJobs = await searchEmployers({
-        ...options,
-        targetRole: altRole,
-      });
-      
-      for (const job of altJobs) {
-        const key = job.employer_name?.toLowerCase().trim();
-        if (key && !seenEmployers.has(key)) {
-          seenEmployers.add(key);
-          allJobs.push(job);
-        }
-      }
-    }
-  }
-  
-  console.log(`[JSearch] Final result: ${allJobs.length} unique employers`);
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`[JSearch] PARALLEL COMPLETE: ${allJobs.length} unique employers from ${rolesToSearch.length} searches in ${elapsed}s`);
   return allJobs;
 }
 
@@ -286,50 +255,6 @@ export function normalizeTargetRole(rawInput: string): string[] {
   
   // Dedupe and return
   return Array.from(new Set(searchTerms));
-}
-
-/**
- * Get alternative role titles to expand search
- */
-function getAlternativeRoles(targetRole: string): string[] {
-  const role = targetRole.toLowerCase();
-  
-  if (role.includes('warehouse') || role.includes('distribution')) {
-    return [
-      'Logistics Supervisor',
-      'Shipping Supervisor',
-      'Fulfillment Supervisor',
-      'Operations Supervisor warehouse',
-      'Inventory Supervisor',
-    ];
-  }
-  
-  if (role.includes('manufacturing') || role.includes('production')) {
-    return [
-      'Production Supervisor',
-      'Plant Supervisor',
-      'Assembly Supervisor',
-      'Operations Supervisor manufacturing',
-      'Shift Supervisor manufacturing',
-    ];
-  }
-  
-  if (role.includes('shipping') || role.includes('receiving')) {
-    return [
-      'Warehouse Supervisor',
-      'Logistics Supervisor',
-      'Distribution Supervisor',
-      'Dock Supervisor',
-    ];
-  }
-  
-  // Generic fallbacks
-  return [
-    `${targetRole.split(' ')[0]} Lead`,
-    `Senior ${targetRole.split(' ')[0]}`,
-    targetRole.replace('Supervisor', 'Manager'),
-    targetRole.replace('Manager', 'Supervisor'),
-  ];
 }
 
 /**
