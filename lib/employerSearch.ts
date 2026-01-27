@@ -285,7 +285,7 @@ export function normalizeTargetRole(rawInput: string): string[] {
   }
   
   // Dedupe and return
-  return [...new Set(searchTerms)];
+  return Array.from(new Set(searchTerms));
 }
 
 /**
