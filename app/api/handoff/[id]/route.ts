@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Redis from 'ioredis';
-
-// Initialize Redis client
-const redis = new Redis(process.env.REDIS_URL || '');
+import { kv } from '@vercel/kv';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const payload = await redis.get(`handoff:${params.id}`);
+    const payload = await kv.get(`handoff:${params.id}`);
 
     if (!payload) {
       console.log(`[Handoff] ID not found or expired: ${params.id}`);
@@ -21,8 +18,8 @@ export async function GET(
 
     console.log(`[Handoff] Retrieved handoff ID: ${params.id}`);
 
-    // Parse the JSON string from Redis
-    const parsedPayload = JSON.parse(payload);
+    // kv.get already returns parsed JSON, but handle string case
+    const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
 
     return NextResponse.json(parsedPayload);
   } catch (error: any) {
