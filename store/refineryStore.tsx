@@ -269,19 +269,22 @@ export function RefineryProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Check for Forge handoff in localStorage
+    // Check for Forge handoff in localStorage - ALWAYS prioritize fresh handoff
     const handoff = localStorage.getItem('forge_handoff');
-    if (handoff && !saved) {
+    if (handoff) {
       try {
         const payload = JSON.parse(handoff);
-        setState((prev) => ({
-          ...prev,
+        // Fresh handoff ALWAYS overrides old state - start fresh for new user
+        setState({
+          ...INITIAL_STATE,
           forgePayload: payload,
           currentStage: 'confirm-profile', // Skip reception if auto-loaded
-        }));
+        });
         // Clear handoff after loading
         localStorage.removeItem('forge_handoff');
-        console.log('✅ Forge data loaded successfully:', payload.handoff_id);
+        // Also clear old refinery state to prevent contamination
+        localStorage.removeItem('refinery_state');
+        console.log('✅ Forge data loaded successfully (fresh start):', payload.handoff_id);
       } catch (e) {
         console.error('Failed to parse Forge handoff:', e);
       }
