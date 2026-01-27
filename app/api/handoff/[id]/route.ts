@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@vercel/kv';
+import Redis from 'ioredis';
 
-// Create KV client with explicit config (handles different env var names)
-const kv = createClient({
-  url: process.env.KV_REST_API_URL || process.env.STORAGE_URL || '',
-  token: process.env.KV_REST_API_TOKEN || process.env.STORAGE_TOKEN || '',
-});
+// Initialize Redis client - try multiple env var names
+const redisUrl = process.env.KV_REST_API_REDIS_URL || process.env.REDIS_URL || '';
+const redis = new Redis(redisUrl);
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const payload = await kv.get(`handoff:${params.id}`);
+    const payload = await redis.get(`handoff:${params.id}`);
 
     if (!payload) {
       console.log(`[Handoff] ID not found or expired: ${params.id}`);
@@ -24,8 +22,7 @@ export async function GET(
 
     console.log(`[Handoff] Retrieved handoff ID: ${params.id}`);
 
-    // kv.get already returns parsed JSON, but handle string case
-    const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    const parsedPayload = JSON.parse(payload);
 
     return NextResponse.json(parsedPayload);
   } catch (error: any) {

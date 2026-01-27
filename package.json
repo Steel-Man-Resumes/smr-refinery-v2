@@ -15,7 +15,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "framer-motion": "^11.0.0",
-    "@vercel/kv": "^2.0.0",
+    "ioredis": "^5.4.1",
     "next": "^14.2.0",
     "openai": "^4.73.0",
     "react": "^18.3.0",
