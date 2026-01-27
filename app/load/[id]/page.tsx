@@ -23,7 +23,7 @@ export default function LoadHandoff() {
         const payload = await res.json();
 
         // Store in localStorage for Refinery to pick up
-        localStorage.setItem('forgePayload', JSON.stringify(payload));
+        localStorage.setItem('forge_handoff', JSON.stringify(payload));
 
         console.log('[Handoff] Payload loaded successfully');
 
@@ -51,7 +51,7 @@ export default function LoadHandoff() {
             Handoff links expire after 24 hours. You may need to generate a new one from the Forge.
           </p>
           <a
-            href="https://smr-forge-v2.vercel.app"
+            href="https://forge.steelmanresumes.com"
             className="inline-block px-6 py-3 bg-steelGold text-forge-black rounded-lg font-semibold hover:bg-steelGold/90 transition-colors"
           >
             Return to Forge
