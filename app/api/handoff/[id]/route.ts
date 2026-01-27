@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from '@vercel/kv';
+
+// Create KV client with explicit config (handles different env var names)
+const kv = createClient({
+  url: process.env.KV_REST_API_URL || process.env.STORAGE_URL || '',
+  token: process.env.KV_REST_API_TOKEN || process.env.STORAGE_TOKEN || '',
+});
 
 export async function GET(
   request: NextRequest,
