@@ -1,0 +1,558 @@
+{
+  "schema_version": "1.0",
+  "handoff_id": "test-marcus-webb-001",
+  "checksum": "test-checksum-12345",
+  "generated_at": "2026-01-26T12:00:00Z",
+  "profile": {
+    "full_name": "Marcus James Webb",
+    "phone": "(414) 555-0123",
+    "email": "marcus.webb@email.com",
+    "city": "Milwaukee",
+    "state": "WI",
+    "zip": "53202",
+    "linkedin": "linkedin.com/in/marcuswebb"
+  },
+  "intake": {
+    "goals": [
+      "Find a Manufacturing Operations Supervisor role that values leadership experience",
+      "Work for a second-chance friendly employer",
+      "Earn $65,000-$80,000 annually"
+    ],
+    "challenges": [
+      "Previous felony conviction from 2010",
+      "Limited formal education beyond associate degree",
+      "Need to demonstrate reliability and trustworthiness"
+    ],
+    "constraints": {
+      "shift_preference": "any",
+      "weekend_ok": "yes",
+      "max_commute_minutes": 45,
+      "transportation": "reliable_car",
+      "physical_standing": "lots",
+      "physical_lifting": "lots"
+    },
+    "tech_comfort": "comfortable",
+    "target_role": "Manufacturing Operations Supervisor"
+  },
+  "work_history": [
+    {
+      "company": "ABC Manufacturing",
+      "title": "Production Supervisor",
+      "location": "Milwaukee, WI",
+      "start_date": "2015-08",
+      "end_date": null,
+      "raw_dates": "August 2015 - Present",
+      "bullets": [
+        "Reduced production errors by 34% through process improvements and team training",
+        "Managed $2.3M in inventory with 99.2% accuracy across multiple product lines",
+        "Led team of 25 production workers across 3 shifts, maintaining 98% attendance",
+        "Implemented lean manufacturing principles reducing waste by 22%",
+        "Achieved zero safety incidents for 18 consecutive months"
+      ],
+      "is_current": true
+    },
+    {
+      "company": "XYZ Industrial Solutions",
+      "title": "Team Lead",
+      "location": "Milwaukee, WI",
+      "start_date": "2013-03",
+      "end_date": "2015-07",
+      "raw_dates": "March 2013 - July 2015",
+      "bullets": [
+        "Promoted from operator to team lead within 18 months",
+        "Implemented safety protocols reducing incidents by 45%",
+        "Trained 15+ new operators on equipment and safety procedures",
+        "Coordinated daily production schedules for 10-person team"
+      ],
+      "is_current": false
+    }
+  ],
+  "education": [
+    {
+      "institution": "Milwaukee Area Technical College",
+      "credential": "Associate of Applied Science",
+      "field": "Manufacturing Technology",
+      "year": "2013",
+      "is_completed": true
+    }
+  ],
+  "certifications_raw": [
+    "Lean Six Sigma Green Belt",
+    "OSHA 30-Hour General Industry",
+    "Forklift Operator Certified"
+  ],
+  "military": {
+    "branch": null,
+    "rank": null,
+    "years": null,
+    "discharge": null
+  },
+  "narrative": {
+    "archetype": "The Proven Leader",
+    "headline": "Operations-Focused Supervisor | 10+ Years Manufacturing | Lean Six Sigma",
+    "summary": {
+      "professional": "Manufacturing operations supervisor with 10+ years of progressive leadership experience. Demonstrated success reducing errors by 34%, managing $2.3M inventory, and leading 25-person teams. Lean Six Sigma certified with proven track record in process improvement and safety excellence.",
+      "friendly": "I'm a hands-on manufacturing supervisor who gets results. Over the past decade, I've cut production errors by a third, managed millions in inventory, and built teams that show up and perform. I believe in leading from the front and making everyone around me better.",
+      "direct": "10+ years manufacturing supervisor. Cut errors 34%. Managed $2.3M inventory. Lead 25-person teams. Lean Six Sigma certified. Zero safety incidents 18 months."
+    },
+    "elevator_pitch_30s": "I'm Marcus Webb, a manufacturing supervisor with 10+ years leading production teams. At ABC Manufacturing, I reduced errors by 34% and manage $2.3M in inventory with near-perfect accuracy. I'm Lean Six Sigma certified and passionate about building high-performing teams. I'm looking for a company that values proven leadership and gives people second chances.",
+    "linkedin_about": "Manufacturing operations professional with a decade of experience leading teams to exceed production goals while maintaining world-class safety standards.\n\nWhat drives me: Building teams that show up, work hard, and take pride in quality work. I believe manufacturing is where America's middle class thrives.\n\nKey Results:\n• Reduced production errors by 34% through systematic process improvement\n• Managed $2.3M inventory with 99.2% accuracy\n• Led 25-person team across 3 shifts\n• 18 months zero safety incidents\n• 22% waste reduction through lean principles\n\nCertifications: Lean Six Sigma Green Belt, OSHA 30-Hour\n\nI'm passionate about second-chance hiring and believe everyone deserves the opportunity to prove themselves.",
+    "story_arc": {
+      "beginning": "Started on the factory floor as an operator at XYZ Industrial, learning every machine and process from the ground up.",
+      "development": "Promoted to team lead within 18 months after demonstrating reliability, technical knowledge, and natural leadership. Pursued Lean Six Sigma certification while working full-time.",
+      "challenge": "Faced a personal setback in 2010 (felony conviction) that could have ended my career. Instead, used it as motivation to prove my worth through consistent excellence and leadership.",
+      "current": "Now supervising 25 production workers at ABC Manufacturing with responsibility for $2.3M inventory and multiple product lines. Recognized for cutting errors by 34% and maintaining 18-month zero-incident safety record.",
+      "future": "Ready to bring proven leadership and process improvement expertise to a growth-oriented manufacturer that values results, reliability, and second chances."
+    },
+    "positioning_strategy": "Position as 'proven leader with skin in the game' - someone who started at the bottom, faced adversity, and earned every promotion through results. Emphasize 10+ years of consistent employment, measurable results (34% error reduction, $2.3M inventory management), and leadership of diverse teams. Address background proactively as evidence of rehabilitation and commitment."
+  },
+  "skills": {
+    "skills": {
+      "hard": [
+        "Lean Manufacturing",
+        "Six Sigma",
+        "Production Planning",
+        "Inventory Management",
+        "Quality Control",
+        "Safety Compliance (OSHA)",
+        "ERP Systems (SAP, Oracle)",
+        "Forklift Operation",
+        "Process Improvement",
+        "Root Cause Analysis"
+      ],
+      "soft": [
+        "Team Leadership",
+        "Communication",
+        "Problem Solving",
+        "Conflict Resolution",
+        "Training & Development",
+        "Time Management",
+        "Adaptability",
+        "Work Ethic"
+      ],
+      "transferable": [
+        "Cross-functional collaboration",
+        "Performance management",
+        "Budget oversight",
+        "Scheduling & coordination",
+        "Documentation & reporting",
+        "Continuous improvement mindset"
+      ]
+    },
+    "keywords": {
+      "present": [
+        "Manufacturing",
+        "Production Supervisor",
+        "Lean",
+        "Six Sigma",
+        "Team Leadership",
+        "Safety",
+        "Quality Control",
+        "Process Improvement",
+        "Inventory Management"
+      ],
+      "missing_critical": [
+        "5S",
+        "Kaizen",
+        "Value Stream Mapping"
+      ],
+      "missing_recommended": [
+        "TPM",
+        "OEE",
+        "Kanban"
+      ],
+      "industry_buzzwords": [
+        "continuous improvement",
+        "operational excellence",
+        "world-class manufacturing",
+        "zero defect",
+        "right first time"
+      ]
+    },
+    "skills_matrix": [
+      {
+        "skill": "Team Leadership",
+        "level": "expert",
+        "evidence": "10+ years leading teams of 10-25 workers, multiple promotions",
+        "ats_value": "high"
+      },
+      {
+        "skill": "Lean Manufacturing",
+        "level": "proficient",
+        "evidence": "Six Sigma Green Belt certified, 22% waste reduction achieved",
+        "ats_value": "high"
+      },
+      {
+        "skill": "Safety Management",
+        "level": "expert",
+        "evidence": "OSHA 30-Hour certified, 18 months zero incidents",
+        "ats_value": "high"
+      },
+      {
+        "skill": "Inventory Management",
+        "level": "expert",
+        "evidence": "Managed $2.3M inventory with 99.2% accuracy",
+        "ats_value": "medium"
+      },
+      {
+        "skill": "ERP Systems",
+        "level": "proficient",
+        "evidence": "Daily use of SAP for production planning and inventory",
+        "ats_value": "medium"
+      }
+    ],
+    "ats_assessment": {
+      "current_score_estimate": 75,
+      "potential_score": 85,
+      "biggest_gaps": [
+        "Missing some industry buzzwords (5S, Kaizen, Value Stream Mapping)",
+        "Could strengthen with specific software/system names",
+        "Limited mention of continuous improvement methodologies"
+      ],
+      "quick_fixes": [
+        "Add '5S implementation' to skills if applicable",
+        "Mention specific ERP systems by name",
+        "Include 'Kaizen events' if participated",
+        "Quantify more achievements with numbers"
+      ]
+    }
+  },
+  "strategy": {
+    "ideal_job_profile": "Manufacturing Operations Supervisor or Production Manager role at a mid-to-large manufacturer in Milwaukee area. Company values safety, has structured training programs, and ideally has second-chance hiring practices. Salary range $65K-$80K with benefits. Opportunity for advancement to plant manager level.",
+    "target_titles": {
+      "primary": [
+        "Manufacturing Supervisor",
+        "Production Supervisor",
+        "Operations Supervisor",
+        "Shift Supervisor"
+      ],
+      "secondary": [
+        "Team Lead",
+        "Production Manager",
+        "Operations Coordinator"
+      ],
+      "stretch": [
+        "Plant Manager",
+        "Operations Manager",
+        "Manufacturing Manager"
+      ],
+      "avoid": [
+        {
+          "title": "Machine Operator",
+          "reason": "Step backwards - you've supervised operators for 10+ years"
+        },
+        {
+          "title": "Entry Level Supervisor",
+          "reason": "You have 10+ years experience, not entry level"
+        }
+      ]
+    },
+    "target_industries": {
+      "tier1_best_fit": [
+        {
+          "industry": "Food & Beverage Manufacturing",
+          "why": "High safety standards align with your zero-incident record. Often second-chance friendly due to labor needs.",
+          "local_strength": "Milwaukee has 50+ food manufacturing facilities including MillerCoors, Palermo's Pizza"
+        },
+        {
+          "industry": "Industrial Manufacturing",
+          "why": "Your experience directly transfers. Strong union presence means structured advancement.",
+          "local_strength": "Harley-Davidson, GE Healthcare, Briggs & Stratton all hiring supervisors"
+        },
+        {
+          "industry": "Metal Fabrication",
+          "why": "Lean manufacturing skills highly valued. Strong need for safety-focused supervisors.",
+          "local_strength": "200+ metal fabrication shops in Milwaukee metro, chronic supervisor shortage"
+        }
+      ],
+      "tier2_good_alternatives": [
+        {
+          "industry": "Packaging & Distribution",
+          "why": "Fast-paced environment values your inventory management skills",
+          "local_strength": "Amazon, Uline expanding facilities"
+        },
+        {
+          "industry": "Automotive Parts",
+          "why": "Quality control and process improvement highly valued",
+          "local_strength": "CNH Industrial, Caterpillar present in region"
+        }
+      ],
+      "avoid": [
+        {
+          "industry": "Pharmaceutical Manufacturing",
+          "why": "Extremely strict background checks, high compliance requirements make second-chance difficult"
+        }
+      ]
+    },
+    "salary": {
+      "immediate_realistic": "$60,000 - $72,000",
+      "after_6_months": "$65,000 - $75,000 with performance review",
+      "after_1_year": "$70,000 - $80,000 with promotion potential",
+      "negotiation_leverage": [
+        "10+ years progressive experience",
+        "34% error reduction demonstrates ROI",
+        "Lean Six Sigma certification",
+        "Multi-shift management experience",
+        "Zero safety incidents for 18 months"
+      ],
+      "red_flags": [
+        "Starting below $55K suggests entry-level role, not supervisor",
+        "No benefits package",
+        "Unclear advancement path",
+        "High turnover mentioned in reviews"
+      ]
+    },
+    "application_strategy": {
+      "primary_method": "hybrid",
+      "best_times": "Monday-Wednesday mornings, 8-10am for online applications. Friday afternoons for in-person visits.",
+      "follow_up_approach": "48-hour rule: Apply online, then visit in person 48 hours later with printed resume. Ask for operations or HR manager.",
+      "volume_recommendation": "Quality over quantity: 5-7 strong applications per week with follow-up beats 20 quick applies. Research each company.",
+      "staffing_agencies": {
+        "recommended": true,
+        "reasoning": "Manufacturing staffing agencies often have direct relationships with hiring managers and understand second-chance hiring. Temp-to-perm path builds trust.",
+        "types_to_target": [
+          "Manufacturing specialists (Aerotek, Pro-Staff, Kelly Services)",
+          "Industrial staffing with supervisor placements",
+          "Second-chance focused (Cara, Employ Milwaukee)"
+        ]
+      }
+    },
+    "competitive_advantages": [
+      "10+ years experience vs. typical 3-5 for supervisor roles",
+      "Quantifiable results (34% error reduction, $2.3M inventory)",
+      "Lean Six Sigma certification demonstrates continuous learning",
+      "Multi-shift management experience (many supervisors only work one shift)",
+      "Zero safety incidents shows risk management",
+      "Long tenure at current employer (10+ years) proves reliability"
+    ],
+    "potential_concerns": [
+      {
+        "concern": "Background/criminal record",
+        "mitigation": "Address proactively with 10+ years clean record, consistent employment, and measurable results. Emphasize rehabilitation and value of second chances."
+      },
+      {
+        "concern": "Limited formal education",
+        "mitigation": "Highlight certifications (Lean Six Sigma, OSHA) and 10+ years practical experience. Emphasize results over credentials."
+      },
+      {
+        "concern": "Job hopping perception if leaving current role",
+        "mitigation": "Emphasize 10+ years at ABC shows loyalty. Looking for growth opportunity, not running from problems."
+      }
+    ],
+    "timeline": {
+      "quick_wins": [
+        "Update LinkedIn with headline and about section",
+        "Print 50 copies of resume on quality paper",
+        "Research top 20 target employers",
+        "Contact 3 staffing agencies this week"
+      ],
+      "first_month_goals": [
+        "15-20 quality applications submitted",
+        "5 in-person employer visits",
+        "3 staffing agency meetings",
+        "2-3 interviews scheduled",
+        "Join manufacturing professional group"
+      ],
+      "success_indicators": [
+        "1-2 phone screens per week",
+        "1 in-person interview per week by week 3",
+        "Positive feedback from staffing agencies",
+        "Recruiters calling you (sign of strong LinkedIn presence)"
+      ]
+    }
+  },
+  "barriers": {
+    "challenges": [
+      {
+        "type": "Criminal Record",
+        "employer_perspective": "Concerned about reliability, safety risk, theft risk, liability if something goes wrong. Need proof candidate has changed.",
+        "reframe": "10+ years of consistent employment and zero incidents since 2010 demonstrates complete rehabilitation. I made a mistake 16 years ago and have spent every day since proving I'm trustworthy through results.",
+        "scripts": {
+          "application_written": "I have a felony conviction from 2010 (non-violent, fully resolved). Since then, I've maintained 10+ years of continuous employment in manufacturing supervision, managing $2.3M inventory and leading 25-person teams with zero safety incidents. I'm grateful for employers who give people second chances and reward them with loyalty and excellence.",
+          "if_asked_directly": "Yes, I have a felony from 2010. It was a mistake I made 16 years ago during a difficult time. Since then, I've worked continuously in manufacturing, earned multiple promotions, and proven my reliability every single day. I manage $2.3M in inventory and lead 25 people—my employer trusts me completely because I've earned it. I'm looking for a company that judges me on my last 10 years of results, not one mistake from 16 years ago.",
+          "proactive_address": "I want to be upfront: I have a 2010 felony conviction. I'm not proud of it, but I'm proud of what I've done since. Over the past 10+ years, I've been promoted from operator to supervisor, reduced production errors by 34%, and maintained zero safety incidents. My current employer gave me a chance, and I've rewarded them with loyalty and results. I'm looking for my next employer to be someone who values what I've accomplished and what I can contribute going forward.",
+          "follow_up_written": "Thank you for considering my application. I want to reiterate my commitment to safety, quality, and leadership. While I have a 2010 conviction, my decade-plus record since then speaks for itself: consistent employment, multiple promotions, measurable results, and zero incidents. I'm looking for an employer who values second chances and rewards them with dedication. I'd welcome the opportunity to discuss how my experience can benefit your operations."
+        },
+        "proof_points": [
+          "10+ years continuous employment since conviction",
+          "Multiple promotions (operator → team lead → supervisor)",
+          "Zero safety incidents for 18 months (demonstrates trustworthiness)",
+          "Manage $2.3M inventory (employer trusts you with significant assets)",
+          "34% error reduction (results-focused, not excuse-focused)",
+          "Lean Six Sigma certified (invested in self-improvement)"
+        ],
+        "action_items": [
+          "Get letter of recommendation from current employer specifically addressing reliability and trustworthiness",
+          "Obtain certificate of rehabilitation if available in Wisconsin",
+          "Prepare 2-minute explanation of background that is honest, brief, and pivots to results",
+          "Research second-chance employers in Milwaukee area",
+          "Connect with Employ Milwaukee or other second-chance workforce programs"
+        ],
+        "legal_context": "Wisconsin is not a 'ban the box' state, but Milwaukee has a 'ban the box' ordinance for city employment. Most private employers can ask about criminal history on applications. Under Wisconsin law, employers cannot discriminate based on arrest records, only conviction records, and must consider rehabilitation and relevance to the job. After 10+ years with good conduct, many employers consider this 'aged out' especially for non-violent offenses."
+      }
+    ],
+    "interview_master_scripts": {
+      "tell_me_about_yourself": "I'm a manufacturing supervisor with 10+ years of progressive leadership experience. I started on the factory floor as an operator, got promoted to team lead within 18 months, and have been supervising production teams for the past decade. At ABC Manufacturing, I lead 25 workers across three shifts, manage $2.3M in inventory, and I'm most proud of reducing production errors by 34% through process improvements. I'm Lean Six Sigma certified and passionate about building teams that take pride in quality work. I'm looking for a company that values proven results, strong leadership, and gives people the opportunity to prove themselves.",
+      "why_are_you_looking": "I've been with ABC Manufacturing for over 10 years and I'm grateful for the opportunities they've given me. I've grown from operator to supervisor and learned a tremendous amount. But I'm ready for the next challenge—whether that's a larger team, more complex operations, or advancement toward plant management. I'm looking for a company that has room for growth and values the kind of leadership and results I've delivered.",
+      "greatest_strength": "My greatest strength is getting results through people. Anyone can tell a team what to do, but I focus on building teams that want to perform. That's how I reduced production errors by 34%—not by cracking the whip, but by training people properly, giving them ownership, and holding them accountable. I believe manufacturing is where America's middle class thrives, and I take pride in helping people succeed.",
+      "greatest_weakness": "I'd say I can be too hands-on sometimes. When I see a problem on the floor, my instinct is to jump in and fix it myself rather than coach someone through it. I've learned that's not always the best approach—my job is to develop people, not do their jobs for them. So I've been working on stepping back, asking questions, and letting my team leads solve problems while I guide them. It's made me a better leader.",
+      "why_should_we_hire_you": "Three reasons: Results, reliability, and leadership. Results: I've cut errors 34%, managed $2.3M inventory with 99.2% accuracy, and maintained zero safety incidents for 18 months. Reliability: I've been with the same employer for 10+ years—I show up every day and my teams do too. Leadership: I've led teams of 25 across multiple shifts and built a culture where people take pride in their work. You're not just hiring a supervisor—you're hiring someone who will make your operation run better from day one.",
+      "do_you_have_questions": [
+        "What are the biggest operational challenges facing your production team right now?",
+        "What does success look like for this supervisor role in the first 90 days?",
+        "Can you tell me about the team I'd be leading—size, experience level, shift structure?",
+        "What opportunities are there for advancement for someone who performs well?",
+        "What's your approach to safety and continuous improvement here?",
+        "Does your company have any second-chance hiring initiatives or values around giving people opportunities to prove themselves?"
+      ]
+    },
+    "overall_strategy": "Proactive transparency with immediate pivot to proof. Address background early (application letter or interview) but never dwell—acknowledge it in 1-2 sentences, then spend 10x more time on the 10+ years of results since. Position the background as 'why I work so hard' and 'why I value opportunities others gave me.' Lead with results and let employers see your character through actions (18 months zero incidents, $2.3M trusted inventory, 25 people follow your leadership) rather than just words."
+  },
+  "research": {
+    "past_employer_insights": [
+      {
+        "company": "ABC Manufacturing",
+        "reputation": "Well-regarded regional manufacturer with strong safety culture",
+        "recent_news": "Expanding Milwaukee facility, adding second production line in 2026",
+        "skills_valued": [
+          "Safety consciousness",
+          "Lean manufacturing",
+          "Team leadership",
+          "Process improvement"
+        ],
+        "perception_of_alumni": "ABC Manufacturing supervisors are highly respected in Milwaukee manufacturing community for strong fundamentals and safety focus",
+        "sources": [
+          "Local news articles",
+          "Industry forums",
+          "LinkedIn employee reviews"
+        ]
+      }
+    ],
+    "local_market": {
+      "job_availability": "Strong demand for manufacturing supervisors in Milwaukee area. 200+ manufacturing supervisor positions posted monthly across Indeed, LinkedIn, and staffing agencies.",
+      "major_employers_hiring": [
+        "Harley-Davidson",
+        "GE Healthcare",
+        "Briggs & Stratton",
+        "Palermo's Pizza",
+        "CNH Industrial",
+        "Rexnord",
+        "Caterpillar",
+        "Master Lock"
+      ],
+      "pay_range": "$58,000 - $78,000 for manufacturing supervisors in Milwaukee metro (Indeed, Glassdoor data)",
+      "seasonal_patterns": "Hiring peaks in Q1 (January-March) and Q3 (July-September) as companies ramp up for busy seasons",
+      "notable_trends": "Increasing focus on Lean Six Sigma certification. Many manufacturers struggle to find qualified supervisors with both technical skills and people leadership. Growing interest in second-chance hiring due to labor shortages.",
+      "sources": [
+        "Indeed salary data",
+        "Milwaukee Journal Sentinel workforce articles",
+        "MMAC manufacturing outlook report"
+      ]
+    },
+    "target_employers": [
+      {
+        "name": "Harley-Davidson",
+        "business_type": "Motorcycle Manufacturing",
+        "location": "Multiple Milwaukee locations",
+        "why_good_fit": "Your 34% error reduction and $2.3M inventory management directly matches their need for operational excellence. They're expanding their Milwaukee facility—growth means supervisor opportunities. Known for promoting from within.",
+        "reputation": "good",
+        "how_to_apply": "Online at harley-davidson.com/careers + visit Menomonee Falls plant HR office",
+        "second_chance_friendly": true,
+        "source": "Company website, employee reviews"
+      },
+      {
+        "name": "GE Healthcare",
+        "business_type": "Medical Equipment Manufacturing",
+        "location": "Waukesha",
+        "why_good_fit": "Your safety record (18 months zero incidents) is critical in medical device manufacturing. Lean Six Sigma certification is preferred qualification. Union environment with structured advancement.",
+        "reputation": "good",
+        "how_to_apply": "Online at ge.com/careers, specify Milwaukee location",
+        "second_chance_friendly": null,
+        "source": "Company website"
+      },
+      {
+        "name": "Palermo's Pizza",
+        "business_type": "Food Manufacturing",
+        "location": "Milwaukee",
+        "why_good_fit": "Family-owned company with strong second-chance reputation. Your inventory management and multi-shift experience directly applicable. Known for promoting from within and investing in employee development.",
+        "reputation": "good",
+        "how_to_apply": "Online + in-person at 3301 W Canal St",
+        "second_chance_friendly": true,
+        "source": "Local news, employee reviews, Employ Milwaukee partnerships"
+      },
+      {
+        "name": "Briggs & Stratton",
+        "business_type": "Engine Manufacturing",
+        "location": "Wauwatosa",
+        "why_good_fit": "Lean manufacturing focus aligns with your Six Sigma certification. Long-standing Milwaukee employer with strong benefits. Looking for supervisors with multi-shift experience.",
+        "reputation": "good",
+        "how_to_apply": "Online at basco.com/careers",
+        "second_chance_friendly": null,
+        "source": "Company website"
+      },
+      {
+        "name": "Rexnord",
+        "business_type": "Industrial Manufacturing",
+        "location": "Milwaukee",
+        "why_good_fit": "Process improvement focus (your 34% error reduction demonstrates this skill). Strong union presence means structured pay and advancement. Actively hiring supervisors.",
+        "reputation": "good",
+        "how_to_apply": "Online at rexnord.com/careers + staffing agencies",
+        "second_chance_friendly": null,
+        "source": "Company website, job postings"
+      }
+    ],
+    "competitive_landscape": {
+      "typical_applicant_profile": "Most manufacturing supervisor applicants have 3-7 years experience, associate degree or some college, forklift/safety certifications. Many are internal promotions from team lead roles. Typical weaknesses: limited formal Lean training, single-shift experience only, limited people management.",
+      "candidate_advantages": [
+        "10+ years experience vs typical 3-7 years",
+        "Lean Six Sigma certification (many candidates lack formal certification)",
+        "Multi-shift management experience (most supervisors only manage one shift)",
+        "Large team leadership (25 people vs typical 10-15)",
+        "Significant inventory responsibility ($2.3M demonstrates trust/competence)",
+        "Proven results (34% error reduction is top-tier achievement)"
+      ],
+      "candidate_disadvantages": [
+        "Criminal background (10+ years ago, but still flagged in some systems)",
+        "Associate degree vs bachelor's (though experience compensates)",
+        "Single-employer background could raise 'why leaving now' questions"
+      ],
+      "sources": [
+        "Indeed applicant profiles",
+        "LinkedIn job posting analytics",
+        "Staffing agency insights"
+      ]
+    },
+    "staffing_agencies": [
+      {
+        "name": "Aerotek",
+        "specialization": "Manufacturing & Industrial",
+        "location": "Multiple Milwaukee locations",
+        "reputation": "Top national staffing firm with strong manufacturer relationships. Frequently places supervisors and has temp-to-perm options.",
+        "contact": "414-271-0307 or aerotek.com",
+        "source": "Company website, Indeed partnerships"
+      },
+      {
+        "name": "Kelly Services",
+        "specialization": "Manufacturing, Engineering",
+        "location": "Brookfield, Milwaukee",
+        "reputation": "Established firm with second-chance friendly reputation. Works with many Milwaukee manufacturers for direct-hire supervisor roles.",
+        "contact": "262-782-1290 or kellyservices.com",
+        "source": "Company website"
+      },
+      {
+        "name": "Employ Milwaukee",
+        "specialization": "Workforce development, second-chance",
+        "location": "Downtown Milwaukee",
+        "reputation": "Non-profit workforce agency specifically serving job seekers with barriers. Strong relationships with second-chance employers. Free services.",
+        "contact": "414-270-1700 or employmilwaukee.org",
+        "source": "Community resource, Milwaukee workforce development"
+      }
+    ],
+    "research_confidence": "high",
+    "research_gaps": [
+      "Specific second-chance status of GE Healthcare, Briggs & Stratton unclear",
+      "Could benefit from more metal fabrication shop contacts",
+      "Limited information on newer manufacturers entering Milwaukee market"
+    ]
+  }
+}
