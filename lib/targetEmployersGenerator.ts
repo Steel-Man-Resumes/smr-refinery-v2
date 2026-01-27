@@ -14,6 +14,7 @@ import {
   Header, Footer, PageNumber, PageBreak
 } from 'docx';
 import type { ForgePayloadV1 } from './types';
+import { normalizeTargetRole } from './employerSearch';
 
 // =============================================================================
 // BRAND COLORS & STYLES
@@ -337,7 +338,15 @@ export async function generateTargetEmployersDOCX(payload: ForgePayloadV1): Prom
   // Extract data from payload
   const profile = payload.profile;
   const candidateName = profile.full_name;
-  const targetRole = payload.intake.target_role || payload.strategy?.target_titles?.primary?.[0] || 'Target Role';
+  
+  // Clean up the target role for display
+  // If user typed garbage like "lead man role or QC", show "Quality Control / Team Lead" instead
+  const rawTargetRole = payload.intake.target_role || '';
+  const normalizedRoles = normalizeTargetRole(rawTargetRole);
+  const displayRole = normalizedRoles.length > 0 
+    ? normalizedRoles.slice(0, 2).join(' / ')  // Show first 2 normalized roles
+    : payload.strategy?.target_titles?.primary?.[0] || 'Target Role';
+  
   const location = `${profile.city}, ${profile.state}`;
   const salaryRange = payload.strategy?.salary?.immediate_realistic || '$50,000 - $60,000';
   const commute = `${payload.intake?.constraints?.max_commute_minutes || 30}-Min Commute`;
@@ -365,7 +374,7 @@ export async function generateTargetEmployersDOCX(payload: ForgePayloadV1): Prom
           },
         },
         children: [
-          createHeaderBox(candidateName, targetRole, location, salaryRange, commute),
+          createHeaderBox(candidateName, displayRole, location, salaryRange, commute),
           spacer(300),
           new Paragraph({
             spacing: { before: 400, after: 200 },
@@ -374,7 +383,7 @@ export async function generateTargetEmployersDOCX(payload: ForgePayloadV1): Prom
           new Paragraph({
             spacing: { after: 200 },
             children: [
-              text(`We searched for "${targetRole}" positions in ${location}, but the job search API returned limited results. This can happen with very specific job titles.`, { size: 22 }),
+              text(`We searched for "${rawTargetRole}" positions in ${location}, but the job search API returned limited results. This can happen with very specific job titles.`, { size: 22 }),
             ],
           }),
           new Paragraph({
@@ -430,7 +439,7 @@ export async function generateTargetEmployersDOCX(payload: ForgePayloadV1): Prom
   const children: (Paragraph | Table)[] = [];
 
   // Header
-  children.push(createHeaderBox(candidateName, targetRole, location, salaryRange, commute));
+  children.push(createHeaderBox(candidateName, displayRole, location, salaryRange, commute));
   children.push(spacer(300));
 
   // Stats bar
