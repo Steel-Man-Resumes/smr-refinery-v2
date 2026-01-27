@@ -253,12 +253,19 @@ export async function POST(req: NextRequest) {
       console.warn('  Skipping JSearch API call, using Forge employers only');
     } else {
       try {
+        // Pass work history for smarter search term generation
+        const workHistoryForSearch = (forgePayload.work_history || []).map(job => ({
+          title: job.title || '',
+          company: job.company || '',
+        }));
+        
         const jobResults = await searchEmployersExpanded({
           targetRole,
           city,
           state,
           apiKey,
           datePosted: 'month',
+          workHistory: workHistoryForSearch,
         });
 
       // Assign tiers based on job posting recency
