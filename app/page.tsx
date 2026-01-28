@@ -34,7 +34,7 @@ function StartOverButton() {
   );
 }
 
-export function BackButton({ onClick, label = "← Back" }: { onClick: () => void; label?: string }) {
+function BackButton({ onClick, label = "← Back" }: { onClick: () => void; label?: string }) {
   return (
     <button
       onClick={onClick}
