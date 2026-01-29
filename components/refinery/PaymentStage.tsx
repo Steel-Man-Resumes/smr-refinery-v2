@@ -12,17 +12,25 @@ export default function PaymentStage() {
   const [promoCode, setPromoCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [promoApplied, setPromoApplied] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
 
   const price = BRAND.pricing.refinery; // $37.21
-  const discount = promoCode.toUpperCase() === 'LETEMCOOK' ? 100 : 0;
-  const finalPrice = discount === 100 ? 0 : price;
+  const finalPrice = appliedDiscount === 100 ? 0 : price * (1 - appliedDiscount / 100);
 
   const handleApplyPromo = () => {
-    if (promoCode.toUpperCase() === 'LETEMCOOK') {
+    const upperPromo = promoCode.toUpperCase();
+    const discount = BRAND.promoCodes[upperPromo as keyof typeof BRAND.promoCodes];
+
+    if (discount) {
       setPromoApplied(true);
-      alert('🎉 Promo code applied! Your documents are FREE!');
+      setAppliedDiscount(discount);
+      if (discount === 100) {
+        alert('🎉 Promo code applied! Your documents are FREE!');
+      } else {
+        alert(`✅ Promo code applied! ${discount}% off - Now $${(price * (1 - discount / 100)).toFixed(2)}`);
+      }
     } else {
-      alert('Invalid promo code');
+      alert('❌ Invalid promo code');
     }
   };
 
@@ -138,7 +146,7 @@ export default function PaymentStage() {
           </div>
           {promoApplied && (
             <p className="text-steelGold text-sm mt-2">
-              ✓ Promo code &quot;LETEMCOOK&quot; applied!
+              ✓ Promo code applied: {appliedDiscount}% off!
             </p>
           )}
         </div>

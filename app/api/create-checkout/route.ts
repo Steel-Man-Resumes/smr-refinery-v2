@@ -10,15 +10,27 @@ export async function POST(req: NextRequest) {
   try {
     const { priceAmount, promoCode } = await req.json();
 
-    // Check if promo code gives 100% discount
-    if (promoCode && promoCode.toUpperCase() === 'LETEMCOOK') {
+    // Check if valid promo code and calculate discount
+    let discount = 0;
+    if (promoCode) {
+      const upperPromo = promoCode.toUpperCase();
+      discount = BRAND.promoCodes[upperPromo as keyof typeof BRAND.promoCodes] || 0;
+    }
+
+    // If 100% discount, skip payment
+    if (discount === 100) {
       return NextResponse.json({
         success: true,
         free: true,
+        discount: 100,
         sessionId: null,
         url: null,
       });
     }
+
+    // Calculate discounted price
+    const basePrice = priceAmount || BRAND.pricing.refineryStripe;
+    const discountedPrice = Math.round(basePrice * (1 - discount / 100));
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -29,9 +41,11 @@ export async function POST(req: NextRequest) {
             currency: 'usd',
             product_data: {
               name: 'The Refinery - Professional Resume & Cover Letter Package',
-              description: 'Complete job search documents with lifetime access',
+              description: discount > 0
+                ? `Complete job search documents (${discount}% off!)`
+                : 'Complete job search documents with lifetime access',
             },
-            unit_amount: priceAmount || BRAND.pricing.refineryStripe, // cents
+            unit_amount: discountedPrice,
           },
           quantity: 1,
         },

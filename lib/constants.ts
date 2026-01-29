@@ -33,6 +33,8 @@ export const BRAND = {
 
   promoCodes: {
     LETEMCOOK: 100, // percent off
+    LETEMCOOK25: 25, // 25% off
+    LETEMCOOK50: 50, // 50% off
   },
 } as const;
 
