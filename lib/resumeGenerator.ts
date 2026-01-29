@@ -52,6 +52,170 @@ export interface ResumeContentV2 {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// BULLET CONDENSATION & PAGE LIMIT ENFORCEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface BulletScore {
+  bullet: string;
+  score: number;
+}
+
+/**
+ * Score a single bullet based on priority rules
+ */
+function scoreBullet(bullet: string): number {
+  let score = 0;
+  const lower = bullet.toLowerCase();
+
+  // +3: Advancement/promotion language
+  if (/advanced to|promoted|earned responsibility|elevated to|selected for|chosen to lead/i.test(bullet)) {
+    score += 3;
+  }
+
+  // +3: Quantifiable metrics
+  if (/\d+%|\d+\+|[\$\d][\d,]+|\d+ [a-z]+|increased by|reduced by|saved|grew/i.test(bullet)) {
+    score += 3;
+  }
+
+  // +2: Equipment operation
+  if (/operated|equipment|machinery|forklift|excavator|loader|crane|cnc|hydraulic|pneumatic/i.test(lower)) {
+    score += 2;
+  }
+
+  // +2: Leadership/supervision
+  if (/led|managed|supervised|trained|mentored|coordinated team|crew|direct reports/i.test(lower)) {
+    score += 2;
+  }
+
+  // +1: Technical/specialized skills
+  if (/welding|blueprint|cad|precision|calibrate|diagnostic|troubleshoot|repair|maintain/i.test(lower)) {
+    score += 1;
+  }
+
+  // -1: Generic tasks
+  if (/clean work area|follow.*instruction|maintain inventory|communicate with|assist with|help with|support with/i.test(lower)) {
+    score -= 1;
+  }
+
+  // -2: Single-word-verb starters with no specificity
+  if (/^(assist|help|support)\s/i.test(bullet) && bullet.length < 50) {
+    score -= 2;
+  }
+
+  return score;
+}
+
+/**
+ * Merge equipment lists into single bullets
+ */
+function mergeEquipmentBullets(bullets: string[]): string[] {
+  const equipmentBullets: string[] = [];
+  const otherBullets: string[] = [];
+  const equipmentKeywords = /operated|equipment|machinery|forklift|excavator|loader|crane|skid steer|bulldozer|backhoe/i;
+
+  bullets.forEach(bullet => {
+    if (equipmentKeywords.test(bullet)) {
+      equipmentBullets.push(bullet);
+    } else {
+      otherBullets.push(bullet);
+    }
+  });
+
+  // If multiple equipment bullets, try to merge
+  if (equipmentBullets.length > 2) {
+    const equipmentList = equipmentBullets
+      .map(b => b.replace(/^Operated?\s+/i, '').replace(/^equipment including\s+/i, ''))
+      .join(', ')
+      .toLowerCase();
+
+    const merged = `Operated heavy equipment including ${equipmentList.split(',').slice(0, 5).join(',')}`;
+    return [merged, ...otherBullets];
+  }
+
+  return bullets;
+}
+
+/**
+ * Condense bullets for a single job based on tenure and priority
+ */
+function condenseBulletsForJob(
+  bullets: string[],
+  jobIndex: number,
+  totalJobs: number,
+  maxBulletsPerJob: number = 5
+): string[] {
+  if (bullets.length <= maxBulletsPerJob) {
+    return bullets;
+  }
+
+  // Merge equipment first
+  let processedBullets = mergeEquipmentBullets(bullets);
+
+  // Score all bullets
+  const scored: BulletScore[] = processedBullets.map(bullet => ({
+    bullet,
+    score: scoreBullet(bullet)
+  }));
+
+  // Sort by score (highest first)
+  scored.sort((a, b) => b.score - a.score);
+
+  // Determine target count based on job recency
+  let targetCount = maxBulletsPerJob;
+  if (jobIndex >= totalJobs - 2) {
+    // Oldest 2 jobs get fewer bullets
+    targetCount = Math.min(3, maxBulletsPerJob);
+  } else if (jobIndex >= totalJobs - 4) {
+    targetCount = Math.min(4, maxBulletsPerJob);
+  }
+
+  // Take top N bullets
+  return scored.slice(0, targetCount).map(s => s.bullet);
+}
+
+/**
+ * Remove generic filler bullets
+ */
+function removeGenericFiller(bullets: string[]): string[] {
+  const genericPatterns = [
+    /^clean(ed)? work areas?$/i,
+    /^follow(ed)? supervisor (instructions?|directions?)$/i,
+    /^maintain(ed)? inventory$/i,
+    /^communicate(d)? with team$/i,
+    /^attend(ed)? meetings?$/i,
+    /^complete(d)? assigned tasks?$/i
+  ];
+
+  return bullets.filter(bullet => {
+    const trimmed = bullet.trim();
+    return !genericPatterns.some(pattern => pattern.test(trimmed));
+  });
+}
+
+/**
+ * Condense all bullets across all jobs
+ */
+function condenseBullets(content: ResumeContentV2, maxBulletsPerJob: number = 5): ResumeContentV2 {
+  const totalJobs = content.experience.length;
+
+  return {
+    ...content,
+    experience: content.experience.map((job, index) => {
+      // Remove generic filler first
+      let bullets = removeGenericFiller(job.bullets);
+
+      // Then condense based on priority and tenure
+      bullets = condenseBulletsForJob(bullets, index, totalJobs, maxBulletsPerJob);
+
+      return {
+        ...job,
+        bullets
+      };
+    })
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN EXPORT: Generate Resume Content
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -86,8 +250,9 @@ export async function generateResumeContentV2(
   
   // Generate context lines and impact headlines for each job
   const enhancedExperience = await enhanceWorkHistory(anthropic, payload);
-  
-  return {
+
+  // Build initial content
+  const initialContent: ResumeContentV2 = {
     brandedHeadline,
     metricsBar,
     summary,
@@ -103,6 +268,11 @@ export async function generateResumeContentV2(
     hasGap,
     gapExplanation,
   };
+
+  // Apply bullet condensation to enforce 2-page maximum
+  const condensedContent = condenseBullets(initialContent, 5);
+
+  return condensedContent;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
