@@ -1,12 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { BRAND } from '@/lib/constants';
+import {
+  checkFailedPaymentLimit,
+  recordFailedPayment,
+  recordSuccessfulPayment,
+} from '@/lib/rateLimit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2025-02-24.acacia',
 });
 
 export async function POST(req: NextRequest) {
+  // Check rate limit for failed payments
+  const { allowed, remaining } = await checkFailedPaymentLimit(req);
+
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: 'Too many failed payment attempts',
+        message: 'You have exceeded the maximum number of payment attempts. Please try again in 1 hour or contact support.',
+        retryAfter: 3600,
+      },
+      { status: 429 }
+    );
+  }
+
   try {
     const { priceAmount, promoCode } = await req.json();
 
@@ -19,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     // If 100% discount, skip payment
     if (discount === 100) {
+      await recordSuccessfulPayment(req, promoCode, 0);
       return NextResponse.json({
         success: true,
         free: true,
@@ -58,6 +78,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Record successful checkout session creation
+    await recordSuccessfulPayment(req, promoCode, discountedPrice / 100);
+
     return NextResponse.json({
       success: true,
       sessionId: session.id,
@@ -65,6 +88,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Stripe checkout error:', error);
+
+    // Record failed payment attempt
+    const { promoCode: errorPromo } = await req.json().catch(() => ({ promoCode: undefined }));
+    await recordFailedPayment(req, errorPromo);
+
     return NextResponse.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
