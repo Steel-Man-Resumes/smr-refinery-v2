@@ -7,8 +7,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import Redis from 'ioredis';
 import { Resend } from 'resend';
 
-const redis = new Redis(process.env.KV_REST_API_REDIS_URL || process.env.REDIS_URL || '');
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-load Redis and Resend to avoid initialization during build
+let redisInstance: Redis | null = null;
+let resendInstance: Resend | null = null;
+
+function getRedis(): Redis {
+  if (!redisInstance) {
+    redisInstance = new Redis(process.env.KV_REST_API_REDIS_URL || process.env.REDIS_URL || '');
+  }
+  return redisInstance;
+}
+
+function getResend(): Resend {
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
+}
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -39,7 +54,7 @@ export async function logPaymentAttempt(
 
   // Store in Redis for 7 days
   const key = `payment_log:${Date.now()}`;
-  await redis.setex(key, 60 * 60 * 24 * 7, JSON.stringify(logEntry));
+  await getRedis().setex(key, 60 * 60 * 24 * 7, JSON.stringify(logEntry));
 }
 
 /**
@@ -50,7 +65,7 @@ async function sendPaymentAlert(
   failedAttempts: number
 ): Promise<void> {
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: 'Refinery Security <onboarding@resend.dev>',
       to: ['troyrichardcarr@gmail.com'],
       subject: `⚠️ Multiple Failed Payments: ${ip}`,
@@ -86,7 +101,7 @@ export async function checkFailedPaymentLimit(
   const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
   try {
-    const current = await redis.get(key);
+    const current = await getRedis().get(key);
     const count = current ? parseInt(current, 10) : 0;
 
     if (count >= MAX_FAILED) {
@@ -112,10 +127,10 @@ export async function recordFailedPayment(
   const WINDOW_SECONDS = 60 * 60; // 1 hour
 
   try {
-    const newCount = await redis.incr(key);
+    const newCount = await getRedis().incr(key);
 
     if (newCount === 1) {
-      await redis.expire(key, WINDOW_SECONDS);
+      await getRedis().expire(key, WINDOW_SECONDS);
     }
 
     await logPaymentAttempt(ip, false, promoCode);
@@ -141,7 +156,7 @@ export async function recordSuccessfulPayment(
 
   // Clear failed attempts on success
   const key = `failed_payments:${ip}`;
-  await redis.del(key);
+  await getRedis().del(key);
 
   await logPaymentAttempt(ip, true, promoCode, amount);
 }
